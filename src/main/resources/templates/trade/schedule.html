@@ -1,8 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="kr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
-    <meta charset="UTF-8">
-    <title>일정</title>
+    <title>Weather Information</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.9/css/weather-icons.min.css">
     <style>
       .container {
         display: flex;
@@ -12,27 +16,276 @@
 
       .section {
         flex-basis: 30%;
+        text-align: center;
+      }
+
+      #calendar {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      #weather-info {
+        position: absolute;
+        top: 65%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+      }
+
+      .container {
+        display: flex;
+        justify-content: center;
+      }
+
+      .container .section {
+        margin-right: 20px;
+      }
+
+      .fc-past {
+        pointer-events: none;
+        background-color: hsl(0, 0%, 90%);
+      }
+
+      .fc-today {
+        background-color: #a3c3ff;
+      }
+
+      .fc-selected {
+        background-color: hsl(120, 70%, 90%);
+      }
+
+      .weather-icon {
+        font-size: 48px;
+        margin: 10px auto;
+        display: block;
+      }
+
+      .weather-info-text {
+        margin-bottom: 10px;
+      }
+
+      .button-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      /* 알림 메시지 스타일 */
+      .notification {
+        background-color: #f8f8f8;
+        padding: 10px;
+        border: 1px solid #ccc;
+        margin-bottom: 20px;
+        text-align: center;
+        font-size: 18px;
+      }
+
+      /* 섹션 스타일 */
+      .section {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      /* 버튼 컨테이너 스타일 */
+      .button-container {
+        margin-top: 20px;
+        text-align: center;
+      }
+
+      .button-container button {
+        margin-right: 10px;
       }
     </style>
 </head>
 <body>
-<h1>일정 예약</h1>
-
-<div class="container">
-  <div class="section">
-    <h2>거래 가능 시간</h2>
-    <!-- 거래 가능 시간 내용 추가 -->
-  </div>
-
-  <div class="section">
-    <h2>캘린더</h2>
-    <!-- 캘린더 내용 추가 -->
-  </div>
-
-  <div class="section">
-    <h2>시간 선택</h2>
-    <!-- 시간 선택 내용 추가 -->
-  </div>
+<!-- 알림 메시지 -->
+<div class="notification">
+    <span th:text="'[' + (${role} == 'buyer' ? ${seller.nickName} : ${buyer.nickName}) + ']'"></span>
+    <span th:text="'님과 [' + ${trade.boardId.title} + '] 에 대한 거래 일정 잡기.'"></span>
 </div>
+
+<!-- 거래 가능 시간 섹션 -->
+<div class="container">
+    <div class="section">
+        <h2>거래 가능 시간</h2>
+        <!-- 여기에 거래 가능 시간 내용 추가 -->
+    </div>
+
+    <!-- 캘린더 섹션 -->
+    <div class="section">
+        <h2>캘린더</h2>
+        <!-- 여기에 캘린더 요소 추가 -->
+        <div id="calendar"></div>
+        <!-- 여기에 날씨 정보 출력 영역 추가 -->
+        <div class="weather-info">
+            <h3><i class="far fa-calendar-alt"></i> 선택된 날짜의 날씨 정보</h3>
+            <p class="weather-info-text" id="selected-date"></p>
+            <p class="weather-info-text" id="weather-description"></p>
+            <p class="weather-info-text" id="temperature"></p>
+            <p class="weather-info-text" id="humidity"></p>
+            <p id="error"></p>
+            <i class="weather-icon"></i><br>
+            <div class="button-container">
+                <button>확인</button>
+                <button>취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 시간 선택 섹션 -->
+    <div class="section" id="time-selection-section" style="display: none;">
+        <h2>시간 선택</h2>
+        <div id="selected-date-display"></div>
+        <select id="selected-time">
+            <option value="7">07:00</option>
+            <option value="8">08:00</option>
+            <option value="9">09:00</option>
+            <!-- 여기에 다른 시간 옵션 추가 -->
+        </select>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+<script>
+    $(document).ready(function() {
+        var selectedDate = null; // 선택된 날짜 변수 초기화
+
+        $('#calendar').fullCalendar({
+            dayClick: function(date, jsEvent, view) {
+                if (moment(date).isBefore(moment(), 'day')) {
+                    return false; // 선택할 수 없는 지난 날짜인 경우
+                }
+
+                $('#calendar .fc-selected').removeClass('fc-selected'); // 기존 선택 해제
+
+                $(this).addClass('fc-selected'); // 선택한 날짜에 표시 추가
+
+                selectedDate = moment(date).format('YYYY-MM-DD'); // 선택된 날짜 저장
+
+                updateWeatherInfo();
+                showTimeSelectionSection();
+            },
+            dayRender: function(date, cell) {
+                if (moment(date).isBefore(moment(), 'day')) {
+                    cell.addClass('fc-past'); // 지난 날짜는 스타일 적용
+                }
+            }
+        });
+
+        function updateWeatherInfo() {
+            if (selectedDate) {
+                // 날짜를 선택한 경우에만 해당 정보 표시
+                $('#selected-date').text(selectedDate);
+                $('#weather-info').show();
+            } else {
+                // 날짜를 선택하지 않은 경우 정보 숨김
+                $('#selected-date').text('');
+                $('#weather-info').hide();
+            }
+
+            // 선택된 날짜가 변경되었을 때 API를 통해 날씨 정보 가져오기
+            if (selectedDate) {
+                // 초기화
+                $('#weather-description').text('');
+                $('#temperature').text('');
+                $('#humidity').text('');
+                $('#error').text('');
+                $('.weather-icon').removeClass().addClass('weather-icon'); // 이전 아이콘 클래스 제거
+
+                $.ajax({
+                    url: 'https://api.openweathermap.org/data/2.5/forecast',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        q: 'Seoul',
+                        appid: '6e0b43163870f54935b87aa653d3a308',
+                        units: 'metric'
+                    },
+                    success: function(data) {
+                        var forecasts = data.list;
+                        var selectedForecast = forecasts.find(function(forecast) {
+                            return moment(forecast.dt_txt).format('YYYY-MM-DD') === selectedDate;
+                        });
+
+                        if (selectedForecast) {
+                            $('#weather-description').text('날씨: ' + selectedForecast.weather[0].description);
+                            $('#temperature').text('온도: ' + selectedForecast.main.temp + ' °C');
+                            $('#humidity').text('습도: ' + selectedForecast.main.humidity + '%');
+                            $('#error').text('');
+                            var weatherIconClass = getWeatherIconClass(selectedForecast.weather[0].icon);
+                            $('.weather-icon').addClass(weatherIconClass);
+                        } else {
+                            $('#error').text('일주일 간의 날씨 정보만 제공합니다.');
+                        }
+                    },
+                    error: function() {
+                        $('#weather-description').text('');
+                        $('#temperature').text('');
+                        $('#humidity').text('');
+                        $('#error').text('날씨 정보를 가져오는데 실패했습니다.');
+                    }
+                });
+            }
+        }
+
+        function getWeatherIconClass(iconCode) {
+            switch (iconCode) {
+                case '01d':
+                    return 'wi wi-day-sunny';
+                case '01n':
+                    return 'wi wi-night-clear';
+                case '02d':
+                    return 'wi wi-day-cloudy';
+                case '02n':
+                    return 'wi wi-night-alt-cloudy';
+                case '03d':
+                case '03n':
+                    return 'wi wi-cloud';
+                case '04d':
+                case '04n':
+                    return 'wi wi-cloudy';
+                case '09d':
+                case '09n':
+                    return 'wi wi-showers';
+                case '10d':
+                    return 'wi wi-day-rain';
+                case '10n':
+                    return 'wi wi-night-alt-rain';
+                case '11d':
+                    return 'wi wi-day-thunderstorm';
+                case '11n':
+                    return 'wi wi-night-alt-thunderstorm';
+                case '13d':
+                    return 'wi wi-day-snow';
+                case '13n':
+                    return 'wi wi-night-alt-snow';
+                case '50d':
+                    return 'wi wi-day-fog';
+                case '50n':
+                    return 'wi wi-night-fog';
+                default:
+                    return 'wi wi-day-sunny';
+            }
+        }
+
+        updateWeatherInfo(); // 페이지 로드 시 초기화
+    });
+
+    function showTimeSelectionSection() {
+        $('#time-selection-section').show();
+    }
+
+    function getSelectedTime() {
+        var selectedTime = $('#selected-time').val();
+        if (selectedTime) {
+            return selectedTime + ':00';
+        }
+        return null;
+    }
+</script>
 </body>
 </html>

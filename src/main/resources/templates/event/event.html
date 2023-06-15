@@ -9,22 +9,27 @@
     }
 
     .board-item {
-      flex: 1;
-      width: 580px;
-      height: auto;
-      background-color: #f9f9f9;
-      margin: 5px;
-      position: inherit;
-      border: 1px solid grey;
-      overflow: auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+         flex: 1;
+    width: 550px;
+    height: auto;
+    background-color: #f9f9f9;
+    margin: 5px;
+    position: inherit;
+    border: 1px solid grey;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    float: left;
     }
 
+
+
+
+
     .board-item img {
-      max-width: 100%;
-      max-height: 100%;
+         width: 28.5vw;
+    height: 29vh;
     }
 
     /* 네비게이션 바 영역 스타일 */
@@ -69,6 +74,8 @@
     .tab-button:hover {
       background-color: #94E6DF;
     }
+
+
   </style>
 </head>
 <body>
@@ -102,10 +109,10 @@
                     <img th:src="@{../image/eventPage/event1.jpg}" alt="이벤트1">
                 </div>
                 <div class="board-item">
-                    <img th:src="@{../image/eventPage/event2.png}" alt="이벤트2">
+                    <img th:src="@{../image/eventPage/event2.jpg}" alt="이벤트2">
                 </div>
                 <div class="board-item">
-                    <img th:src="@{../image/eventPage/event3.jpg}" alt="이벤트3">
+                    <img th:src="@{../image/eventPage/event3.png}" alt="이벤트3">
                 </div>
                 <div class="board-item">
                     <img th:src="@{../image/eventPage/event4.jpg}" alt="이벤트4">

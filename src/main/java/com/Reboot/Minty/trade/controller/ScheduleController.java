@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -29,15 +30,19 @@ public class ScheduleController {
         this.tradeService = tradeService;
         this.tradeBoardService = tradeBoardService;
     }
-    @GetMapping("/schedule")
-    public String schedule(Model model, HttpServletRequest request) {
+    @GetMapping("/schedule/{tradeId}")
+    public String schedule(@PathVariable(value = "tradeId") Long tradeId,Model model, HttpServletRequest request) {
         HttpSession session = request.getSession();
         Long userId = (Long) session.getAttribute("userId");
-        List<Trade> trades = tradeService.getTradeList(userId);
-        List<User> users = tradeService.getTradeUsers(trades, userId);
+        Trade trade = tradeService.getTradeDetail(tradeId);
+        String role = tradeService.getRoleForTrade(tradeId, userId);
+        User buyer= userService.getUserInfoById(trade.getBuyerId().getId());
+        User seller= userService.getUserInfoById(trade.getSellerId().getId());
 
-        model.addAttribute("trades", trades);
-        model.addAttribute("users", users);
+        model.addAttribute("trade", trade);
+        model.addAttribute("role",role);
+        model.addAttribute("buyer",buyer);
+        model.addAttribute("seller",seller);
         return "trade/schedule";
     }
 

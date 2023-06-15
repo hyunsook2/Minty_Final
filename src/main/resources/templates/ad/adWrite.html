@@ -78,7 +78,7 @@
 </head>
 <body>
 <h1>광고 요청글 작성</h1>
-<form method="post" th:action="@{/adWrite}" th:object="${ad}" enctype="multipart/form-data">
+<form method="post" th:action="@{/adWrite}" th:object="${ad}" enctype="multipart/form-data"  style="position: static;">
     <!-- CSRF 토큰 추가 -->
     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
@@ -93,7 +93,7 @@
 
     <label>이미지:</label>
     <input type="file" name="imageFile" onchange="readURL(this)" accept="image/*" required/><br/>
-    <img id="preview" src="#" alt="Preview" style="max-width: 200px; display: none;"/><br/>
+    <img id="preview" src="#" alt="Preview" style="max-width: 200px; display: none;position: relative;margin-left:36vw;z-index:50;"/><br/>
 
     <label>Email:</label>
     <input type="email" th:field="*{email}" required/><br/>
@@ -119,6 +119,8 @@
     <label>금액:</label>
     <input type="text" id="amount" th:value="${ad.amount}" readonly required/><br/>
     <input type="submit" value="Save"/>
+
+
 </form>
 </body>
 </html>

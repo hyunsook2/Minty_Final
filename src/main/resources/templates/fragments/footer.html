@@ -161,13 +161,11 @@
         <br>
         고객센터
       </a>
-      <a href="/adWrite">
+      <a  style="cursor: pointer;"onclick="openAd()">
         <img src="/image/ad.PNG" alt="로고 이미지" width="30px" height="30px" />
         <br>
         광고문의
-
       </a>
-
 
     </div>
     <div class="footer-info">
@@ -185,6 +183,20 @@
       $("html, body").animate({ scrollTop: $(document).height() }, 800);
     });
   });
+
+function openAd() {
+  var popupWidth = 600;
+  var popupHeight = 700;
+  var leftPosition = (window.screen.width - popupWidth) / 2;
+  var topPosition = (window.screen.height - popupHeight) / 2;
+
+  var url = "/adWrite"; // 실제로 열고자 하는 페이지의 URL로 변경해주세요
+
+  var newWindow = window.open(url, "_blank", "width=" + popupWidth + ", height=" + popupHeight + ", left=" + leftPosition + ", top=" + topPosition + ", resizable=yes");
+}
+
+
+
 
     var images = [
         "/image/ad/ff.png",
