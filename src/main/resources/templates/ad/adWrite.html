@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="kr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>광고 요청글 작성</title>
+    <script>
+        function calculateAmount() {
+            var duration = document.querySelector('input[name="duration"]:checked').value;
+            var amount = document.getElementById("amount");
+
+            if (duration === "7") {
+                amount.value = "500000";
+            } else if (duration === "30") {
+                amount.value = "2000000";
+            } else if (duration === "90") {
+                amount.value = "5000000";
+            } else if (duration === "180") {
+                amount.value = "8000000";
+            } else if (duration === "365") {
+                amount.value = "15000000";
+            }
+        }
+
+        function calculateEndDate() {
+            var startDate = new Date(document.getElementById("startDate").value);
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (startDate < today) {
+                alert("현재 날짜 이후의 날짜를 선택해주세요.");
+                document.getElementById("startDate").value = "";
+                document.getElementById("endDate").value = "";
+                return;
+            }
+
+            var duration = document.querySelector('input[name="duration"]:checked').value;
+            var endDate = new Date(startDate.getTime() + (duration * 24 * 60 * 60 * 1000));
+            var endDateInput = document.getElementById("endDate");
+            endDateInput.value = endDate.toISOString().split('T')[0];
+            endDateInput.setAttribute("min", endDate.toISOString().split('T')[0]);
+        }
+
+        function validateImageFile(input) {
+            var file = input.files[0];
+
+            // 이미지 파일이 선택되지 않은 경우
+            if (!file) {
+                alert("이미지 파일을 선택해주세요.");
+                input.value = "";
+                return false;
+            }
+
+            // 선택된 파일이 이미지 파일이 아닌 경우
+            var allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+            if (!allowedTypes.includes(file.type)) {
+                alert("올바른 이미지 파일 형식을 선택해주세요.");
+                input.value = "";
+                return false;
+            }
+
+            return true;
+        }
+
+        function readURL(input) {
+            if (validateImageFile(input)) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var preview = document.getElementById('preview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+</head>
+<body>
+<h1>광고 요청글 작성</h1>
+<form method="post" th:action="@{/adWrite}" th:object="${ad}" enctype="multipart/form-data">
+    <!-- CSRF 토큰 추가 -->
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+
+    <label>광고주명:</label>
+    <input type="text" th:field="*{advertiserName}" required/><br/>
+
+    <label>제목:</label>
+    <input type="text" th:field="*{title}" required/><br/>
+
+    <label>내용:</label>
+    <textarea th:field="*{content}" required></textarea><br/>
+
+    <label>이미지:</label>
+    <input type="file" name="imageFile" onchange="readURL(this)" accept="image/*" required/><br/>
+    <img id="preview" src="#" alt="Preview" style="max-width: 200px; display: none;"/><br/>
+
+    <label>Email:</label>
+    <input type="email" th:field="*{email}" required/><br/>
+
+    <label>기간:</label><br/>
+    <input type="radio" id="7days" name="duration" value="7" onclick="calculateAmount()" required/>
+    <label for="7days">7일 (500,000원)</label><br/>
+    <input type="radio" id="30days" name="duration" value="30" onclick="calculateAmount()" required/>
+    <label for="30days">한달 (2,000,000원)</label><br/>
+    <input type="radio" id="90days" name="duration" value="90" onclick="calculateAmount()" required/>
+    <label for="90days">3달 (5,000,000원)</label><br/>
+    <input type="radio" id="180days" name="duration" value="180" onclick="calculateAmount()" required/>
+    <label for="180days">6달 (8,000,000원)</label><br/>
+    <input type="radio" id="365days" name="duration" value="365" onclick="calculateAmount()" required/>
+    <label for="365days">1년 (15,000,000원)</label><br/>
+
+    <label>시작일:</label>
+    <input type="date" id="startDate" th:field="*{startDate}" onchange="calculateEndDate()" required/><br/>
+
+    <label>종료일:</label>
+    <input type="date" id="endDate" th:field="*{endDate}" readonly/><br/>
+
+    <label>금액:</label>
+    <input type="text" id="amount" th:value="${ad.amount}" readonly required/><br/>
+    <input type="submit" value="Save"/>
+</form>
+</body>
+</html>

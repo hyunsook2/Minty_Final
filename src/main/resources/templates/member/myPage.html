@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="kr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
+<head>
+    <style>
+    /* 프로필 영역 스타일 */
+    .profile-area {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 10px;
+        border-bottom: 2px solid #000;
+        bottom:0;
+    }
+
+    .profile .info {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: row;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    .profile .info .ratings {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .profile .info .ratings img {
+        width: 30px;
+        height: 40px;
+    }
+
+    .profile img {
+        max-width: 100%;
+    }
+
+    .profile .info .information {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-left: 10px;
+    }
+
+    .profile .info .information .nickname,
+    .profile .info .information .email {
+        margin-top: 5px;
+    }
+
+    .profile {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        margin-right: 10px;
+        width: 20%;
+        min-width: 20%;
+        border: 2px solid #000;
+        margin-bottom: 10px;
+        height: 300px;
+    }
+
+    .profile img:last-child {
+    margin-bottom: 10px;
+    }
+
+    .moneyView {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      width: 180px;
+      margin-right: 10px;
+      border: 2px solid #000;
+      margin-bottom: 10px;
+      height: 300px;
+    }
+
+    .deco {
+      flex-grow: 1;
+      border: 2px solid #000;
+      height: 300px;
+    }
+.tab-button {
+      display: block;
+      padding: 10px 20px 10px 20px;
+      float: left;
+      text-decoration: none;
+      cursor: pointer;
+      font-family:'font';
+      margin-right: 10px;
+      margin-top: 5px;
+      margin-bottom: 5px;
+      border:2px solid black;
+      border-radius: 45px;
+      background-color: white;
+      transition: color 0.5s, background-color 0.5s ease-in-out;
+      color:black;
+      }
+      .tab-content {
+        display: none;
+        padding: 10px;
+      }
+      .show {
+        display: block;
+      }
+      .select {
+        background-color:#F5A9E1;
+       color:#FFFFFF;
+      }
+     .tab-button:hover {
+      background-color:#94E6DF;
+    }
+
+
+    .tab-content g{
+        margin: 0;
+        padding: 20px;
+    }
+    /* 네비게이션 바 영역 스타일 */
+    .Categories-area {
+        padding: 10px;
+        border-bottom: 2px solid #000;
+        border: 2px solid #000;
+        border-bottom: 2px solid #000;
+    }
+
+    /* 보드 영역 스타일 */
+    .board-area {
+        padding: 10px;
+        border: 2px solid #000;
+        height: 3000px;
+    }
+    .pay{
+       display:flex;
+       border-top: 2px solid black;
+       align-items: center;
+       width: 180px;
+    }
+    .pay-m{
+        align-items: center;
+    }
+
+    //출금버튼
+    .sidebar {
+      border: 2px solid #000;
+      overflow: auto;
+      margin-left: auto;
+      margin-bottom: 20px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+     .sidebar ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .sidebar ul li {
+      padding: 8px 12px;
+      margin: 10px;
+    }
+    .sidebar ul li:hover {
+      background-color: #eaeaea;
+    }
+
+    .sidebar ul li a {
+      display: block;
+      text-decoration: none;
+      color: #000;
+    }
+
+    .charge {
+        width: 180px;
+        height:74px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        background-color: white;
+        border:2px solid black;
+    }
+    .charge img {
+        vertical-align: middle;
+        margin-right: 10px;
+    }
+
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:inline="javascript">
+    //충전창
+    function openNewWindow() {
+        var popupWidth = 900;
+        var popupHeight = 800;
+        var leftPosition = (window.screen.width - popupWidth) / 2;
+        var topPosition = (window.screen.height - popupHeight) / 2;
+
+        window.open(/*[[@{/charge}]]*/, '_blank', 'width=' + popupWidth + ', height=' + popupHeight + ', left=' + leftPosition + ', top=' + topPosition);
+    }
+
+     //출금창
+      function openNewWindow2() {
+        var popupWidth = 900;
+        var popupHeight = 800;
+        var leftPosition = (window.screen.width - popupWidth) / 2;
+        var topPosition = (window.screen.height - popupHeight) / 2;
+
+        window.open(/*[[@{/wthdr}]]*/, '_blank', 'width=' + popupWidth + ', height=' + popupHeight + ', left=' + leftPosition + ', top=' + topPosition);
+    }
+
+     //개인정보수정칸
+      function edit() {
+        var popupWidth = 900;
+        var popupHeight = 800;
+        var leftPosition = (window.screen.width - popupWidth) / 2;
+        var topPosition = (window.screen.height - popupHeight) / 2;
+
+        window.open(/*[[@{/edit}]]*/, '_blank', 'width=' + popupWidth + ', height=' + popupHeight + ', left=' + leftPosition + ', top=' + topPosition);
+    }
+
+
+      $(document).ready(function() {
+        $(".charge").on("mouseover", function() {
+            console.log("됨");
+            $(this).css("background-color", "rgba(128, 128, 128, 0.5)");
+        });
+
+        $(".charge").on("mouseout", function() {
+            $(this).css("background-color", "white");
+        });
+    });
+
+</script>
+
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="container">
+
+        <div class="profile-area">
+            <!-- 프로필 영역 내용 -->
+            <div class="profile">
+                <img src="/image/manager.PNG" alt="프로필 사진">
+                <div class="info">
+                    <div class="ratings">
+                        <img src="/image/myPage/score.PNG" alt="평점 이미지">
+                        <div class="score">평점칸</div>
+                    </div>
+                    <div class="information">
+                        <div class="nickname">Lv. <span th:text="${user.level}"></span> <span th:text="${user.nickName}"></span></div>
+                        <div class="email"><span th:text="${user.email}"></span></div>
+                    </div>
+                </div>
+                <img class="user_exp" th:if="${user.exp != null}">
+                <th:block th:switch="${user.exp}">
+                    <img th:case="0" th:src="@{/image/mypage/exp0.png}" alt="0">
+                    <img th:case="10" th:src="@{/image/mypage/exp10.png}" alt="10">
+                    <img th:case="20" th:src="@{/image/mypage/exp20.png}" alt="20">
+                    <img th:case="30" th:src="@{/image/mypage/exp30.png}" alt="30">
+                    <img th:case="*" th:src="@{/image/mypage/exp40.PNG}" alt="40">
+                </th:block>
+                </img>
+            </div>
+
+            <div class="moneyView">
+                <div>
+                    보유 포인트
+                </div>
+                <div style="text-align: center;">
+                    <div class="point" style="width: 80%; text-align: center;" >
+                        <span th:text="${user.point}"></span>
+                    </div>
+                </div>
+                <div>
+                    보유 잔고
+                </div>
+                <div style="text-align: center;">
+                    <div class="balance" style="width: 80%; text-align: center;" >
+                        <span th:text="${user.balance}"></span>
+                    </div>
+                </div>
+                <div class="pay">
+                    <div class="pay-m">
+                        <div class="charge" onclick="openNewWindow()">
+                            <img src="/image/myPage/charge_in.png" width="30px;" height="30px;" alt="충전아이콘">
+                            <span>충전하기</span>
+                        </div>
+                        <div class="charge" onclick="openNewWindow2()">
+                            <img src="/image/myPage/charge_out.png" width="30px;" height="30px;" alt="출금아이콘">
+                            <span>출금하기</span>
+                        </div>
+                        <div class="charge" onclick="edit()">
+                            <img src="/image/myPage/charge_out.png" width="30px;" height="30px;" alt="개인정보수정">
+                            <span>개인정보수정</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="deco">
+
+            </div>
+        </div>
+
+        <div class="Categories">
+            <ul class="list">
+                <li class="tab-button p select">판매내역</li>
+                <li class="tab-button i">급해요</li>
+                <li class="tab-button g">후기</li>
+            </ul>
+        </div>
+
+
+        <div class="board-area">
+            <!-- 보드 영역 내용 -->
+            보드 영역
+        </div>
+        <div class="tab-content p show">
+            <p>판매내역 보드</p>
+        </div>
+
+        <div class="tab-content i">
+            <p>급해요 보드</p>
+        </div>
+
+        <div class="tab-content g">
+            <p>ㅇ</p>
+        </div>
+    </div>
+
+    <script type="text/javascript" th:src="@{/js/myPage.js}"></script>
+</div>
+</body>
+</html>
