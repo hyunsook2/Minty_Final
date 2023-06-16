@@ -61,7 +61,7 @@
 
         .image-preview img {
             max-width: 100%;
-            margin-top: 10px;
+            object-fit : contain;
         }
         .button-container form {
             display: inline;
@@ -82,12 +82,12 @@
   <div class="ad-details">
     <div class="ad-content">
       <h2>Title: <span th:text="${ad.title}"></span></h2>
-      <p><strong>Advertiser Name:</strong> <span th:text="${ad.advertiserName}"></span></p>
-      <p><strong>Content:</strong> <span th:text="${ad.content}"></span></p>
-      <p><strong>Status:</strong> <span th:text="${ad.status}"></span></p>
-      <p><strong>Start Date:</strong> <span th:text="${ad.startDate}"></span></p>
-      <p><strong>End Date:</strong> <span th:text="${ad.endDate}"></span></p>
-      <p><strong>Amount:</strong> <span th:text="${ad.amount}"></span></p><br><br>
+      <p><strong>요청자:</strong> <span th:text="${ad.advertiserName}"></span></p>
+      <p><strong>내용:</strong> <span th:text="${ad.content}"></span></p>
+      <p><strong>상태:</strong> <span th:text="${ad.status}"></span></p>
+      <p><strong>시작날짜:</strong> <span th:text="${ad.startDate}"></span></p>
+      <p><strong>종료날짜:</strong> <span th:text="${ad.endDate}"></span></p>
+      <p><strong>금액:</strong> <span th:text="${ad.amount}"></span></p><br><br>
       <div class="button-container">
         <form id="approveForm" method="post" th:action="@{/admin/ads/{id}/approve(id=${ad.id})}">
           <input type="submit" value="승인" onclick="submitFormAndClosePopup(event, 'approveForm')"/>
@@ -99,10 +99,10 @@
       </div>
       </div>
       <br><br>
-    </div>
     <div class="image-preview">
-      <img th:if="${ad.image}" th:src="@{'/adimage/' + ${ad.image}}" alt="Ad Image" />
+      <img class="image-preview img" th:src="@{|/adimage/${ad.image}|}" alt="Ad Image" />
     </div>
+  </div>
   </div>
 </div>
 <div class="close">

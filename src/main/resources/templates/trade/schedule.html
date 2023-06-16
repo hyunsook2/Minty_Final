@@ -3,7 +3,10 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
-    <title>Weather Information</title>
+    <meta charset="UTF-8">
+    <title>Minty</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.9/css/weather-icons.min.css">
@@ -100,8 +103,10 @@
     </style>
 </head>
 <body>
-<form method="post" action="/schedule/{tradeId}/save" th:action="@{/schedule/{tradeId}/save(tradeId=${tradeId})}">
-    <!-- 알림 메시지 -->
+<form id="tradeForm" method="post" action="/updateTradeSchedule">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <input type="hidden" name="tradeId" th:value="${tradeId}" />
+
     <div class="notification">
         <span th:text="'[' + (${role} == 'buyer' ? ${seller.nickName} : ${buyer.nickName}) + ']'"></span>
         <span th:text="'님과 [' + ${trade.boardId.title} + '] 에 대한 거래 일정 잡기.'"></span>
@@ -109,29 +114,14 @@
 
     <!-- 거래 가능 시간 섹션 -->
     <div class="container">
-
-            <div class="section">
-                <span th:text="'[' + (${role} == 'buyer' ? ${seller.nickName} : ${buyer.nickName}) + '] 님의 거래 희망 시간'"></span>
-                <!-- 여기에 거래 가능 시간 내용 추가 -->
-
-                <div class="userSchedule">
-                    <div style="cursor: pointer; margin-top: 15px;" class="ad-item">
-                        <div class="image-preview">
-                            <img th:src="@{../image/aaaa.png}" alt="이미지" width="40" height="40" style="border-radius: 50%; margin-left: 10px;">
-                            <span th:text="${role} == 'buyer' ? ${buyer.nickName} : ${seller.nickName}" style="color: #999;"></span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
+        <div class="section">
+            <h2>거래 가능 시간</h2>
+        </div>
 
         <!-- 캘린더 섹션 -->
         <div class="section">
             <h2>캘린더</h2>
-            <!-- 여기에 캘린더 요소 추가 -->
             <div id="calendar"></div>
-            <!-- 여기에 날씨 정보 출력 영역 추가 -->
             <div class="weather-info">
                 <h3><i class="far fa-calendar-alt"></i> 선택된 날짜의 날씨 정보</h3>
                 <p class="weather-info-text" id="selected-date"></p>
@@ -147,17 +137,36 @@
         <div class="section">
             <h2>시간 선택</h2>
             <div id="selected-date-display"></div>
-            <select id="selected-time">
-                <option value="7">07:00</option>
-                <option value="8">08:00</option>
-                <option value="9">09:00</option>
+
+
+            <select id="selected-ampm" name="tradeAMPM" onchange="updateText()">
+                <option value="AM">오전</option>
+                <option value="PM">오후</option>
             </select>
+
+            <select id="selected-hour" name="tradeHour" onchange="updateText()">
+                <option value="1">1시</option>
+                <option value="2">2시</option>
+                <option value="3">3시</option>
+                <option value="4">4시</option>
+                <option value="5">5시</option>
+                <option value="6">6시</option>
+                <option value="7">7시</option>
+                <option value="8">8시</option>
+                <option value="9">9시</option>
+                <option value="10">10시</option>
+                <option value="11">11시</option>
+                <option value="12">12시</option>
+            </select>
+
+            <input type="number" min="0" max="59" value="0" oninput="updateText()" />
+            <div id="result"></div> <!--디비에 이거불러가면됨 #result.value() -->
         </div>
 
     </div>
     <div class="button-container">
-        <button type="button" onclick="saveSchedule()">확인</button>
-        <button type="button" onclick="cancelSchedule()">취소</button>
+        <button type="submit">확인</button>
+        <button type="button">취소</button>
     </div>
 </form>
 
@@ -165,153 +174,89 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
 <script>
-    $(document).ready(function() {
-        var selectedDate = null; // 선택된 날짜 변수 초기화
+<!--function updateText() {-->
+<!--  const ampm = document.getElementById("selected-ampm").value;-->
+<!--  const hour = document.getElementById("selected-hour").value;-->
+<!--  let minute = document.querySelector("input[type=number]").value;-->
 
-        $('#calendar').fullCalendar({
-            dayClick: function(date, jsEvent, view) {
-                if (moment(date).isBefore(moment(), 'day')) {
-                    return false; // 선택할 수 없는 지난 날짜인 경우
-                }
+<!--  // 값이 비어 있을 경우 기본값으로 0 설정-->
+<!--  if (minute === "") {-->
+<!--    minute = 0;-->
+<!--  }-->
 
-                $('#calendar .fc-selected').removeClass('fc-selected'); // 기존 선택 해제
+<!--  const resultDiv = document.getElementById("result");-->
+<!--  resultDiv.textContent = ampm + " " + hour + "시 " + minute + "분";-->
+<!--}-->
 
-                $(this).addClass('fc-selected'); // 선택한 날짜에 표시 추가
+ function updateText() {
+    const ampm = document.getElementById("selected-ampm").value;
+    const hour = document.getElementById("selected-hour").value;
+    const minute = document.querySelector("input[type=number]").value;
+    const resultDiv = document.getElementById("result");
 
-                selectedDate = moment(date).format('YYYY-MM-DD'); // 선택된 날짜 저장
+    resultDiv.textContent = ampm + " " + hour + "시 " + minute + "분";
+  }
 
-                updateWeatherInfo();
-            },
-            dayRender: function(date, cell) {
-                if (moment(date).isBefore(moment(), 'day')) {
-                    cell.addClass('fc-past'); // 지난 날짜는 스타일 적용
-                }
-            }
-        });
+function getSelectedTime() {
+  var selectedTime = $('#selected-time').val();
+  return selectedTime;
+}
 
-        function updateWeatherInfo() {
-            if (selectedDate) {
-                // 날짜를 선택한 경우에만 해당 정보 표시
-                $('#selected-date').text(selectedDate);
-                $('#weather-info').show();
-            } else {
-                // 날짜를 선택하지 않은 경우 정보 숨김
-                $('#selected-date').text('');
-                $('#weather-info').hide();
-            }
+$('#calendar').on('click', '.fc-day', function() {
+    var selectedDate = $(this).data('date');
+    $('#selected-date').text(selectedDate);
+    $('#selected-date-display').text('거래 희망 날짜: ' + selectedDate);
+});
 
-            // 선택된 날짜가 변경되었을 때 API를 통해 날씨 정보 가져오기
-            if (selectedDate) {
-                // 초기화
-                $('#weather-description').text('');
-                $('#temperature').text('');
-                $('#humidity').text('');
-                $('#error').text('');
-                $('.weather-icon').removeClass().addClass('weather-icon'); // 이전 아이콘 클래스 제거
+function updateTradeSchedule() {
+    var selectedDate = $('#selected-date').text();
+    var selectedTime = getSelectedTime();
+    var tradeId = $('input[name="tradeId"]').val(); // tradeId 값을 가져옴
 
-                $.ajax({
-                    url: 'https://api.openweathermap.org/data/2.5/forecast',
-                    type: 'GET',
-                    dataType: 'json',
-                    data: {
-                        q: 'Seoul',
-                        appid: '6e0b43163870f54935b87aa653d3a308',
-                        units: 'metric'
-                    },
-                    success: function(data) {
-                        var forecasts = data.list;
-                        var selectedForecast = forecasts.find(function(forecast) {
-                            return moment(forecast.dt_txt).format('YYYY-MM-DD') === selectedDate;
-                        });
+    var formattedDate = moment(selectedDate, 'YYYY-MM-DD').format('YYYY-MM-DD');
+    var formattedTime = moment(selectedTime, 'HH:mm').format('HH:mm');
 
-                        if (selectedForecast) {
-                            $('#weather-description').text('날씨: ' + selectedForecast.weather[0].description);
-                            $('#temperature').text('온도: ' + selectedForecast.main.temp + ' °C');
-                            $('#humidity').text('습도: ' + selectedForecast.main.humidity + '%');
-                            $('#error').text('');
-                            var weatherIconClass = getWeatherIconClass(selectedForecast.weather[0].icon);
-                            $('.weather-icon').addClass(weatherIconClass);
-                        } else {
-                            $('#error').text('일주일 간의 날씨 정보만 제공합니다.');
-                        }
-                    },
-                    error: function() {
-                        $('#weather-description').text('');
-                        $('#temperature').text('');
-                        $('#humidity').text('');
-                        $('#error').text('날씨 정보를 가져오는데 실패했습니다.');
-                    }
-                });
-            }
+    console.log('선택된 날짜:', selectedDate);
+    console.log('선택된 시간:', selectedTime);
+
+    // 선택된 날짜와 시간을 폼 데이터로 설정
+    var formData = new FormData();
+    formData.append('tradeId', tradeId); // tradeId 값을 추가
+    formData.append('tradeDate', selectedDate);
+    formData.append('tradeTime', selectedTime);
+
+    // CSRF 토큰과 헤더 설정
+    var token = $("meta[name='_csrf']").attr("content");
+    var header = $("meta[name='_csrf_header']").attr("content");
+    $.ajaxSetup({
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader(header, token);
         }
+    });
 
-        function getWeatherIconClass(iconCode) {
-            switch (iconCode) {
-                case '01d':
-                    return 'wi wi-day-sunny';
-                case '01n':
-                    return 'wi wi-night-clear';
-                case '02d':
-                    return 'wi wi-day-cloudy';
-                case '02n':
-                    return 'wi wi-night-alt-cloudy';
-                case '03d':
-                case '03n':
-                    return 'wi wi-cloud';
-                case '04d':
-                case '04n':
-                    return 'wi wi-cloudy';
-                case '09d':
-                case '09n':
-                    return 'wi wi-showers';
-                case '10d':
-                    return 'wi wi-day-rain';
-                case '10n':
-                    return 'wi wi-night-alt-rain';
-                case '11d':
-                    return 'wi wi-day-thunderstorm';
-                case '11n':
-                    return 'wi wi-night-alt-thunderstorm';
-                case '13d':
-                    return 'wi wi-day-snow';
-                case '13n':
-                    return 'wi wi-night-alt-snow';
-                case '50d':
-                    return 'wi wi-day-fog';
-                case '50n':
-                    return 'wi wi-night-fog';
-                default:
-                    return 'wi wi-day-sunny';
-            }
+    // AJAX를 사용하여 폼 데이터를 서버로 전송
+    $.ajax({
+        url: $('#tradeForm').attr('action'),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            console.log('서버 응답:', response);
+        },
+        error: function(xhr, status, error) {
+            console.log('에러:', error);
         }
-
-        updateWeatherInfo(); // 페이지 로드 시 초기화
     });
+}
 
-<!--    function cancelSchedule() {-->
-<!--        // 거래 시간 선택 취소-->
-<!--        $('#selected-date-display').text('');-->
-<!--    }-->
+$('#tradeForm').submit(function(e) {
+    e.preventDefault();
 
-
-
-    function getSelectedTime() {
-        var selectedTime = $('#selected-time').val();
-        return selectedTime;
-    }
-
-     $('#calendar').on('click', '.fc-day', function() {
-        var selectedDate = $(this).data('date');
-        $('#selected-date-display').text('거래 희망 날짜: ' + selectedDate);
-    });
-
-    $('.button-container button:first-child').click(function() {
-        var selectedDate = $('#selected-date').text();
-        var selectedTime = getSelectedTime();
-        console.log('선택된 날짜:', selectedDate);
-        console.log('선택된 시간:', selectedTime);
-    });
-
+    updateTradeSchedule();
+});
 </script>
+
+<script type="text/javascript" th:src="@{/js/weather.js}"></script>
 </body>
 </html>

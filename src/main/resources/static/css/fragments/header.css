@@ -9,6 +9,7 @@
         position: fixed;
        width: 100vw;
            height: 11.7vh;
+           box-shadow : 0 0 12px black;
       }
       .menu-a {
         color: black;

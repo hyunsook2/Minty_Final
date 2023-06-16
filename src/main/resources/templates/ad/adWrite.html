@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <title>광고 요청글 작성</title>
+    <title>Minty 광고 요청</title>
     <script>
         function calculateAmount() {
             var duration = document.querySelector('input[name="duration"]:checked').value;
@@ -74,21 +74,14 @@
                 reader.readAsDataURL(input.files[0]);
             }
         }
+
     </script>
-    <style>
-    .didi{
-        display: flex;
-    align-items: center;
-    justify-content: center;
-    float: left;
-    }
-    </style>
 </head>
 <body>
-<h1>광고 요청글 작성</h1>
-<form method="post" th:action="@{/adWrite}" th:object="${ad}" enctype="multipart/form-data"  style="position: static;">
+<h1>광고 요청 작성</h1>
+<form method="post" th:action="@{/adWrite}" th:object="${ad}" enctype="multipart/form-data">
     <!-- CSRF 토큰 추가 -->
-    <div class="didi">
+    <img id="preview" alt="Preview" style="max-width: 200px; display: none; float: right; position: relative; z-index:50;"/><br/>
     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
     <label>광고주명:</label>
@@ -102,7 +95,7 @@
 
     <label>이미지:</label>
     <input type="file" name="imageFile" onchange="readURL(this)" accept="image/*" required/><br/>
-    <img id="preview" src="#" alt="Preview" style="max-width: 200px; display: none;position: relative;margin-left:36vw;z-index:50;"/><br/>
+
 
     <label>Email:</label>
     <input type="email" th:field="*{email}" required/><br/>
@@ -123,15 +116,17 @@
     <input type="date" id="startDate" th:field="*{startDate}" onchange="calculateEndDate()" required/><br/>
 
     <label>종료일:</label>
-    <input type="date" id="endDate" th:field="*{endDate}" readonly/><br/>
+    <input type="date" id="endDate" th:field="*{endDate}" disabled/><br/>
 
     <label>금액:</label>
-    <input type="text" id="amount" th:value="${ad.amount}" readonly required/><br/>
-    <input type="submit" value="Save"/>
-    </div>
-    <div class="didi">
-        <img id="preview" alt="Preview" style="max-width: 200px; display: none;position: relative; margin-left:36vw;z-index:50;"/><br/>
-    </div>
+    <input type="text" id="amount" th:value="${ad.amount}" disabled required/><br/>
+    <input type="submit" value="광고요청" class="rq"/>
 </form>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+<script>
+    $(".rq").on("click",function(){
+    window.close();
+    })
+</script>
 </body>
 </html>

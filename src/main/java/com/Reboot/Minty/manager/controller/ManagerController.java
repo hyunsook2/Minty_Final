@@ -226,6 +226,8 @@ public class ManagerController {
         Optional<Ad> adOptional = adService.getAdById(id);
         if (adOptional.isPresent()) {
             Ad ad = adOptional.get();
+
+            model.addAttribute("imageFileName", "src/main/resources/static/adimage/" + ad.getImage());
             model.addAttribute("ad", ad);
             return "ad/adAdmin";
         } else {
