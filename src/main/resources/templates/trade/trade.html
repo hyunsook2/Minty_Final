@@ -180,6 +180,19 @@
         <div class="space" th:if="${trade.status == '거래시작' || trade.status == '거래중' || trade.status == '거래완료'}">
             <div class="detail">
                 상세정보
+                <form th:action="@{'/updateMode'}" method="post">
+                    거래방식:
+                    <input type="hidden" name="tradeId" th:value="${trade.id}" />
+
+                    <label>
+                        <input type="radio" name="modeIndex" value="0" th:checked="${trade.mode == '직거래' ? 'checked' : null}" /> 직거래
+                    </label>
+                    <label>
+                        <input type="radio" name="modeIndex" value="1" th:checked="${trade.mode == '안전거래' ? 'checked' : null}" /> 안전거래
+                    </label>
+
+                    <button type="submit">변경</button>
+                </form>
             </div>
         </div>
 
@@ -199,7 +212,7 @@
         </div>
 
         <div class="form-row button-row" th:if="${trade.status == '거래시작' || trade.status == '거래중'}">
-            <button type="button">거래예약</button>
+            <a class="button" th:href="@{/schedule/{tradeId}(tradeId=${trade.id})}">거래예약</a>
             <form th:action="@{'/updateStatus'}" method="post">
                 <input type="hidden" name="tradeId" th:value="${trade.id}" />
                 <input type="hidden" name="statusIndex" th:value="4" />

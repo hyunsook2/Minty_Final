@@ -100,52 +100,66 @@
     </style>
 </head>
 <body>
-<!-- 알림 메시지 -->
-<div class="notification">
-    <span th:text="'[' + (${role} == 'buyer' ? ${seller.nickName} : ${buyer.nickName}) + ']'"></span>
-    <span th:text="'님과 [' + ${trade.boardId.title} + '] 에 대한 거래 일정 잡기.'"></span>
-</div>
-
-<!-- 거래 가능 시간 섹션 -->
-<div class="container">
-    <div class="section">
-        <h2>거래 가능 시간</h2>
-        <!-- 여기에 거래 가능 시간 내용 추가 -->
+<form method="post" action="/schedule/{tradeId}/save" th:action="@{/schedule/{tradeId}/save(tradeId=${tradeId})}">
+    <!-- 알림 메시지 -->
+    <div class="notification">
+        <span th:text="'[' + (${role} == 'buyer' ? ${seller.nickName} : ${buyer.nickName}) + ']'"></span>
+        <span th:text="'님과 [' + ${trade.boardId.title} + '] 에 대한 거래 일정 잡기.'"></span>
     </div>
 
-    <!-- 캘린더 섹션 -->
-    <div class="section">
-        <h2>캘린더</h2>
-        <!-- 여기에 캘린더 요소 추가 -->
-        <div id="calendar"></div>
-        <!-- 여기에 날씨 정보 출력 영역 추가 -->
-        <div class="weather-info">
-            <h3><i class="far fa-calendar-alt"></i> 선택된 날짜의 날씨 정보</h3>
-            <p class="weather-info-text" id="selected-date"></p>
-            <p class="weather-info-text" id="weather-description"></p>
-            <p class="weather-info-text" id="temperature"></p>
-            <p class="weather-info-text" id="humidity"></p>
-            <p id="error"></p>
-            <i class="weather-icon"></i><br>
-            <div class="button-container">
-                <button>확인</button>
-                <button>취소</button>
+    <!-- 거래 가능 시간 섹션 -->
+    <div class="container">
+
+            <div class="section">
+                <span th:text="'[' + (${role} == 'buyer' ? ${seller.nickName} : ${buyer.nickName}) + '] 님의 거래 희망 시간'"></span>
+                <!-- 여기에 거래 가능 시간 내용 추가 -->
+
+                <div class="userSchedule">
+                    <div style="cursor: pointer; margin-top: 15px;" class="ad-item">
+                        <div class="image-preview">
+                            <img th:src="@{../image/aaaa.png}" alt="이미지" width="40" height="40" style="border-radius: 50%; margin-left: 10px;">
+                            <span th:text="${role} == 'buyer' ? ${buyer.nickName} : ${seller.nickName}" style="color: #999;"></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+        <!-- 캘린더 섹션 -->
+        <div class="section">
+            <h2>캘린더</h2>
+            <!-- 여기에 캘린더 요소 추가 -->
+            <div id="calendar"></div>
+            <!-- 여기에 날씨 정보 출력 영역 추가 -->
+            <div class="weather-info">
+                <h3><i class="far fa-calendar-alt"></i> 선택된 날짜의 날씨 정보</h3>
+                <p class="weather-info-text" id="selected-date"></p>
+                <p class="weather-info-text" id="weather-description"></p>
+                <p class="weather-info-text" id="temperature"></p>
+                <p class="weather-info-text" id="humidity"></p>
+                <p id="error"></p>
+                <i class="weather-icon"></i><br>
             </div>
         </div>
-    </div>
 
-    <!-- 시간 선택 섹션 -->
-    <div class="section" id="time-selection-section" style="display: none;">
-        <h2>시간 선택</h2>
-        <div id="selected-date-display"></div>
-        <select id="selected-time">
-            <option value="7">07:00</option>
-            <option value="8">08:00</option>
-            <option value="9">09:00</option>
-            <!-- 여기에 다른 시간 옵션 추가 -->
-        </select>
+        <!-- 시간 선택 섹션 -->
+        <div class="section">
+            <h2>시간 선택</h2>
+            <div id="selected-date-display"></div>
+            <select id="selected-time">
+                <option value="7">07:00</option>
+                <option value="8">08:00</option>
+                <option value="9">09:00</option>
+            </select>
+        </div>
+
     </div>
-</div>
+    <div class="button-container">
+        <button type="button" onclick="saveSchedule()">확인</button>
+        <button type="button" onclick="cancelSchedule()">취소</button>
+    </div>
+</form>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
@@ -167,7 +181,6 @@
                 selectedDate = moment(date).format('YYYY-MM-DD'); // 선택된 날짜 저장
 
                 updateWeatherInfo();
-                showTimeSelectionSection();
             },
             dayRender: function(date, cell) {
                 if (moment(date).isBefore(moment(), 'day')) {
@@ -275,17 +288,30 @@
         updateWeatherInfo(); // 페이지 로드 시 초기화
     });
 
-    function showTimeSelectionSection() {
-        $('#time-selection-section').show();
-    }
+<!--    function cancelSchedule() {-->
+<!--        // 거래 시간 선택 취소-->
+<!--        $('#selected-date-display').text('');-->
+<!--    }-->
+
+
 
     function getSelectedTime() {
         var selectedTime = $('#selected-time').val();
-        if (selectedTime) {
-            return selectedTime + ':00';
-        }
-        return null;
+        return selectedTime;
     }
+
+     $('#calendar').on('click', '.fc-day', function() {
+        var selectedDate = $(this).data('date');
+        $('#selected-date-display').text('거래 희망 날짜: ' + selectedDate);
+    });
+
+    $('.button-container button:first-child').click(function() {
+        var selectedDate = $('#selected-date').text();
+        var selectedTime = getSelectedTime();
+        console.log('선택된 날짜:', selectedDate);
+        console.log('선택된 시간:', selectedTime);
+    });
+
 </script>
 </body>
 </html>

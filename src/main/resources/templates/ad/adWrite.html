@@ -75,11 +75,20 @@
             }
         }
     </script>
+    <style>
+    .didi{
+        display: flex;
+    align-items: center;
+    justify-content: center;
+    float: left;
+    }
+    </style>
 </head>
 <body>
 <h1>광고 요청글 작성</h1>
 <form method="post" th:action="@{/adWrite}" th:object="${ad}" enctype="multipart/form-data"  style="position: static;">
     <!-- CSRF 토큰 추가 -->
+    <div class="didi">
     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
     <label>광고주명:</label>
@@ -119,8 +128,10 @@
     <label>금액:</label>
     <input type="text" id="amount" th:value="${ad.amount}" readonly required/><br/>
     <input type="submit" value="Save"/>
-
-
+    </div>
+    <div class="didi">
+        <img id="preview" alt="Preview" style="max-width: 200px; display: none;position: relative; margin-left:36vw;z-index:50;"/><br/>
+    </div>
 </form>
 </body>
 </html>
